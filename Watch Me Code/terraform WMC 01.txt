@@ -1,0 +1,122 @@
+terraform watch me code 01
+
+Write a Terraform script to provision an EC2 instance.
+
+	provider "aws" {
+	region = "us-east-1"
+	}
+	
+	resource "aws_instance" "my_ec2" {
+	ami = "ami-0f3caa1cf4417e51b"
+	instance_type = t2.micro
+	}
+
+
+Write a Terraform script to provision an S3 bucket.
+
+	provider "aws" {
+	region = "us-east-1"
+	}
+	
+	resource "aws_s3_bucket" "my_bucket" {
+	bucket = "shahbazz-16-bucket"
+	}
+
+Write a Terraform script to provision 3 EC2 instances in 3 different regions.
+
+	provider "aws" {
+	alias = "virginia"
+	region = "us-east-1"
+	}
+	
+	provider "aws" {
+	alias = "stockholm"
+	region = "eu-north-1"
+	}
+	
+	provider "aws" {
+	alias = "london"
+	region = "eu-west-2"
+	}
+	
+	resource "aws_instance" "ec2_virginia" {
+	provider = aws.virginia
+	ami = "ami-0f3caa1cf4417e51b"
+	instance_type = "t2.micro"
+	}
+	
+	resource "aws_instance" "ec2_stockholm" {
+	provider = aws.stockholm
+	ami = "ami-056335ec4a8783947"
+	instance_type = "t2.micro"
+	}
+	
+	resource "aws_instance" "ec2_london" {
+	provider = aws.london
+	ami = "ami-0ba0c1a358147d1a8"
+	instance_type = "t2.micro"
+	}
+	
+
+Write a Terraform script to provision multiple EC2 instances using count and for_each.
+
+	provider "aws" {
+	region = "us-east-1"
+	}
+	
+	resource "aws_instance" "count_ec2" {
+	ami = "ami-0f3caa1cf4417e51b"
+	instnace_type = "t2.micro"
+	count = 3
+	}
+	
+	
+	
+	variable "instance_names" {
+	default = ["dev","test","prod"]
+	}
+	
+	resource "aws_instance" "for_each_ec2" {
+	ami = "ami-0f3caa1cf4417e51b"
+	instance_type = "t2.micro"
+	for_each = toset(var.instance_names)
+	}
+
+Write a Terraform script to provision an EC2 instance using a module.
+
+	main.tf
+	
+	module "ec2_instance" {
+	source = ".//.ec2-module"
+	ami = "ami-0f3caa1cf4417e51b"
+	instance_type = "t2.micro"
+	}
+	
+	ec2-module/main.tf
+	
+	variable "ami" {
+	
+	}
+	variable "instance_type" {
+	
+	}
+	
+	resource "aws_instance" "module_ec2" {
+	ami = var.ami
+	instance_type = var.instance_type
+	}
+
+Write a Terraform script to provision an RDS database instance.
+
+	provider "aws" {
+	region = "us-east-1"
+	}
+	
+	resource "aws_db_instance" "my_rds" {
+	allocated_staorage = 20
+	engine = "mysql"
+	engine_version = "8.0"
+	instance_class = "db_t3.micro"
+	username = "admin"
+	password = "admin123"
+	}

@@ -1,0 +1,131 @@
+terraform watch me code 02
+
+Provision 3 EC2 instances using count
+
+	provider "aws" {
+	region = "us-east-1"
+	}
+	
+	resource "aws_instance" "count-ec2" {
+	ami = ""
+	instance_type = "t2.micro"
+	count = 3
+	
+	tags = {
+	Name = "web-${count.index}"
+	}
+	}	
+
+
+Create an S3 bucket with versioning enabled
+
+	provider "aws" {
+	region = "us-east-1"
+	}
+	
+	resource "aws_s3_bucket" "my-bucket" {
+	bucket_name = "shahbazz-16-bucket"
+	}
+	
+	resource "aws_s3_bucket_versioning" "bucket-versioning" {
+	bucket = aws_s3_bucket_my-bucket_id
+	
+	versioning_configuration {
+	status = "Enabled"
+	}
+	}
+
+
+Create a VPC, subnet, and internet gateway
+
+	provider "aws" {
+	region = "us-east-1"
+	}
+	
+	resource "aws_vpc" "main" {
+	cidr_block = "10.0.0.0/16"
+	}
+	
+	resource "aws_subnet" "public" {
+	vpc_id = aws_vpc.main.id
+	cidr_block = "10.0.1.0/22"
+	}
+	
+	resource "aws_internet_gateway" "igw" {
+	vpc_id = aws_vpc.main.id
+	}
+
+
+Create a variable-based EC2 instance module
+
+	variable "instance_type" {
+	}
+	variable "ami_id" {
+	}
+	variable "name" {
+	}
+	
+	resource "aws_instance" "this" {
+	ami = var.ami_id
+	instance_type = var.instance_type
+	
+	tags = {
+	Name = var.name
+	}
+	}
+	
+	module "ec2_instyance" {
+	source = "/.module/ec2"
+	ami_id = ""
+	instnace_type = "t2.micro"
+	}
+	
+Use for_each to create multiple S3 buckets
+
+	variable "bucket_name" {
+	default = ["bucket-1", "bucket-2", "bucket-3"]
+	}
+	
+	resource "aws_s3_bucket" "bucket" {
+	for_each = toset(var.bucket.name)
+	
+	bucket = each.value
+	}
+
+Data source usage: Retrieve the latest Amazon Linux AMI
+	
+	data "aws_ami" "amazon_linux" {
+	most_recent = true
+	owners = ["amazon"]
+	
+	filter {
+	name = "name"
+	value = ["amazon2-ami-hvm-*x86_64-gp2"]
+	}
+	}
+
+
+Use a lifecycle block to protect S3 from deletion
+
+	resource "aws_s3_bucket" "protected_bucket" {
+	bucket = "protected-bucket-16"
+	
+	lifecycle {
+	prevent_destroy = true
+	}
+	}
+
+Use a conditional expression for region-specific AMIs
+
+		variable "region" {
+	default = "us-east-1"
+	}
+	
+	locals {
+	ami_id = var.region == "us-east-1" ? "ami-aa1" : "ami-bb2"
+	}
+	
+	resource "aws_instance" "example" {
+	ami = local.ami_id
+	instance_type = "t2.micro" 
+	}
